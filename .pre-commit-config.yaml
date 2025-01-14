@@ -3,10 +3,10 @@ repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v5.0.0  # Use the latest stable version
     hooks:
-      - id: trailing-whitespace  # Removes trailing whitespace
-      - id: end-of-file-fixer    # Ensures files end with a newline
-      - id: check-yaml           # Validates YAML file syntax
-      - id: check-added-large-files  # Prevents committing large files
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-added-large-files
 
   # Black for code formatting
   - repo: https://github.com/psf/black
@@ -36,6 +36,8 @@ repos:
     rev: v1.4.0  # Use the latest stable version of Mypy
     hooks:
       - id: mypy
+        additional_dependencies:
+          - types-requests
 
   # Pyupgrade for modernizing Python syntax (e.g., f-strings)
   - repo: https://github.com/asottile/pyupgrade
@@ -43,7 +45,7 @@ repos:
     hooks:
       - id: pyupgrade
         args:
-          - "--py312-plus"  # Target Python 3.8 and above
+          - "--py38-plus"
 
   # Detect secrets to prevent sensitive data from being committed
   - repo: https://github.com/Yelp/detect-secrets
