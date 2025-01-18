@@ -2,9 +2,10 @@
 import requests
 
 from strava.entities import StravaURLs
+from utils.logging_utils import logger
 
 
-def get_access_token(
+def get_strava_access_token(
     client_id: str, client_secret: str, refresh_token: str, grant_type: str
 ) -> dict:
     """Retrieve strava access token."""
@@ -16,6 +17,6 @@ def get_access_token(
     }
 
     response = requests.post(StravaURLs.AUTH_URL.value, data=payload)
-    new_token = response.json()
-
-    return new_token
+    if response.status_code != 200:
+        logger.error(f"Request to strava failed with status {response.status_code}")
+    return response.json()
