@@ -3,7 +3,7 @@ import logging
 from logging import Logger
 
 
-def setup_logger(name: str | None=None, level: int=logging.DEBUG) -> Logger:
+def setup_logger(name: str | None = None, level: int = logging.DEBUG) -> Logger:
     """Sets up a logger with a console handler.
 
     Args:

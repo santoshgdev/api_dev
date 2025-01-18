@@ -10,24 +10,28 @@ from utils.logging_utils import logger
 
 class RedisConnect:
     """Infrastructure Redis Connect."""
+
     def __init__(self):
         """Init function."""
         pass
 
     def open_connection(self):
         """Open Redis connection."""
-        redis_info = get_secret(environ['PROJECT_ID'], "redis_dev")
-        self.interface = redis.Redis(host=redis_info["host"],
-                                     port=redis_info["port"],
-                                     username=redis_info["user"],
-                                     password=redis_info["pw"])
+        redis_info = get_secret(environ["PROJECT_ID"], "redis_dev")
+        self.interface = redis.Redis(
+            host=redis_info["host"],
+            port=redis_info["port"],
+            username=redis_info["user"],
+            password=redis_info["pw"],
+        )
+        logger.debug("Opened Redis connection.")
 
     def close_connection(self):
         """Close Redis connection."""
         self.interface.close()
+        logger.debug("Closed redis connection.")
 
-
-    def write_redis(self, key: str, value: dict, ttl: None | int=None) -> None:
+    def write_redis(self, key: str, value: dict, ttl: None | int = None) -> None:
         """Write key-value to redis db specified in interface.
 
         Args:
@@ -42,12 +46,15 @@ class RedisConnect:
         try:
             self.interface.set(name=key, value=json.dumps(value))
             if ttl:
-                self.interface.expire(name=key, time=ttl)
+                self.interface.setex(name=key, value=json.dumps(value), time=ttl)
+                logger.debug(f"Wrote key with ttl {ttl}")
+            logger.debug(f"Set {key} to redis")
 
         except redis.RedisError as exc:
             logger.error(f"Failed to set key '{key}': {exc}")
         finally:
             self.close_connection()
+            return
 
     def read_redis(self, key: str) -> dict | None:
         """Read from redis interface given a key.
@@ -67,11 +74,33 @@ class RedisConnect:
 
             if value is None:
                 logger.info(f"Failed to get key '{key}'; does not exist")
+                return None
             else:
                 return json.loads(value)
 
         except redis.RedisError as exc:
             logger.error(f"Failed to get key '{key}': {exc}")
+            return None
+        finally:
+            self.close_connection()
+
+    def get_ttl(self, key: str) -> int | None:
+        """Get TTL for particular key in Redis.
+
+        Args:
+            key: str representing key name
+
+        Returns:
+            The TTL in seconds.
+
+        Raises:
+            RedisError
+        """
+        self.open_connection()
+        try:
+            return self.interface.ttl(key)
+        except redis.RedisError as exc:
+            logger.error(f"Failed to get key '{key}' ttl: {exc}")
             return None
         finally:
             self.close_connection()

@@ -45,6 +45,7 @@ repos:
       - id: mypy
         additional_dependencies:
           - types-requests
+          - types-redis
 
   # Pyupgrade for modernizing Python syntax (e.g., f-strings)
   - repo: https://github.com/asottile/pyupgrade
