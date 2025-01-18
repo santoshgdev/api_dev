@@ -5,9 +5,9 @@ from enum import Enum
 class StravaURLs(Enum):
     """Strava specific URLs."""
 
-    AUTH_URL = "https://www.strava.com/api/v3/oauth/token"
+    AUTH_URL = "https://www.strava.com/oauth/token"
     ATHLETE_URL = "https://www.strava.com/api/v3/athlete"
-    ACTIVITY_URL = "https://www.strava.com/api/v3/activity"
+    ACTIVITY_URL = "https://www.strava.com/api/v3/athlete/activities"
 
 
 class StravaKeys(Enum):

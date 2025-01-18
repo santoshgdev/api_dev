@@ -10,16 +10,18 @@ from utils.logging_utils import logger
 
 
 def get_strava_access_token(
-    client_id: str, client_secret: str, refresh_token: str, grant_type: str
+    client_id: str,
+    client_secret: str,
+    code: str,
+    grant_type: str = "authorization_code",
 ) -> dict:
     """Retrieve strava access token."""
     payload = {
         "client_id": client_id,
         "client_secret": client_secret,
-        "refresh_token": refresh_token,
+        "code": code,
         "grant_type": grant_type,
     }
-
     response = requests.post(StravaURLs.AUTH_URL.value, data=payload)
     if response.status_code != 200:
         logger.error(f"Request to strava failed with status {response.status_code}")
@@ -29,13 +31,14 @@ def get_strava_access_token(
 def refresh_access_token_at_expiration():
     """Refreshes strava access token if it happens to be expired."""
     redis = RedisConnect()
-    if not redis.get_ttl(StravaKeys.STRAVA_ACCESS_TOKEN.value):
+    redis_ttl = redis.get_ttl(StravaKeys.STRAVA_ACCESS_TOKEN.value)
+    if redis_ttl is None or redis_ttl < 0:
         logger.info("Refreshing strava access token")
         strava_secret_token = get_secret(environ["PROJECT_ID"], "strava_api")
         strava_access_token = get_strava_access_token(
             client_id=strava_secret_token["client_id"],
             client_secret=strava_secret_token["client_secret"],
-            refresh_token=strava_secret_token["refresh_token"],
+            code=environ["AUTHORIZATION_TOKEN"],
             grant_type=strava_secret_token["grant_type"],
         )
         redis = RedisConnect()
@@ -47,3 +50,23 @@ def refresh_access_token_at_expiration():
         logger.info("Refreshed strava access token")
     else:
         logger.info("Strava token still valid")
+
+
+def get_all_activities():
+    """Get all activities."""
+    redis = RedisConnect()
+    strava_access_dict_from_redis = redis.read_redis(
+        StravaKeys.STRAVA_ACCESS_TOKEN.value
+    )
+    strava_access_token = strava_access_dict_from_redis["access_token"]
+    headers = {"Authorization": f"Bearer {strava_access_token}"}
+
+    page_num = 1
+    activities = []
+    flag = True
+    logger.debug("Getting all activities")
+    while flag:
+        param = {"per_page": 200, "page": page_num}
+        response = requests.get(
+            StravaURLs.ACTIVITY_URL.value, headers=headers, params=param
+        )
