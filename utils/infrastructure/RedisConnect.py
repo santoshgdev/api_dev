@@ -1,6 +1,5 @@
 """Redis Connection Module."""
 import json
-from os import environ
 
 import redis
 
@@ -17,7 +16,7 @@ class RedisConnect:
 
     def open_connection(self):
         """Open Redis connection."""
-        redis_info = get_secret(environ["PROJECT_ID"], "redis_dev")
+        redis_info = get_secret("redis_dev")
         self.interface = redis.Redis(
             host=redis_info["host"],
             port=redis_info["port"],
