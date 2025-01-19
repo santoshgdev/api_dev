@@ -1,12 +1,17 @@
 """Strava specific requests."""
+import json
+
 # mypy: disable-error-code="attr-defined"
 from enum import Enum
 from os import environ
 
 import requests
-from cloudpathlib import GSPath
+from stravalib import Client
+from stravalib.model import Stream
+from tqdm import tqdm
 
-from strava.entities import StravaKeys, StravaURLs
+from strava.cloud_utils import get_strava_storage_path
+from strava.entities import StravaKeys, StravaModels, StravaStreams, StravaURLs
 from utils.cloud_utils import get_secret, write_json_to_storage
 from utils.infrastructure.RedisConnect import RedisConnect
 from utils.logging_utils import logger
@@ -27,7 +32,9 @@ def get_strava_access_token(
     }
     response = requests.post(StravaURLs.AUTH_URL.value, data=payload)
     if response.status_code != 200:
-        logger.error(f"Request to strava failed with status {response.status_code}")
+        raise Exception(
+            f"Request to strava failed with status {response.status_code}: {response.text}"
+        )
     return response.json()
 
 
@@ -60,7 +67,7 @@ def write_refreshed_access_token_to_redis():
     logger.info("Refreshed strava access token")
 
 
-def get_all_activities(InfrastructureNames: Enum) -> None:
+def get_all_data(InfrastructureNames: Enum) -> None:
     """Get all activities."""
     redis = RedisConnect()
     strava_access_dict_from_redis = redis.read_redis(
@@ -73,21 +80,35 @@ def get_all_activities(InfrastructureNames: Enum) -> None:
     )
     if not strava_access_token:
         return None
-    headers = {"Authorization": f"Bearer {strava_access_token}"}
-
-    page_num = 1
-    flag = True
-    logger.debug("Getting all activities")
-    while flag:
-        param = {"per_page": 200, "page": page_num}
-        response = requests.get(
-            StravaURLs.ACTIVITY_URL.value, headers=headers, params=param
+    client = Client(access_token=strava_access_token)
+    activities = list(client.get_activities())
+    for activity in tqdm(activities, desc="Getting activities"):
+        activity_dump = activity.model_dump()
+        athlete_id, activity_id = activity_dump["athlete"]["id"], activity_dump["id"]
+        path = get_strava_storage_path(
+            bucket=InfrastructureNames.bronze_bucket,
+            athlete_id=athlete_id,
+            strava_model=StravaModels.ACTIVITY,
+            activity_id=activity_id,
         )
-        response_json = response.json()
-        for activity in response_json:
-            athlete_id = activity["athlete"]["id"]
-            activity_id = activity["id"]
-            path = GSPath(
-                f"gs://{InfrastructureNames.bronze_bucket.value}/strava/athlete_id={athlete_id}/activity_id={activity_id}.json"
-            )
-            write_json_to_storage(path, activity)
+        write_json_to_storage(path, json.loads(activity.model_dump_json()))
+
+        streams = client.get_activity_streams(
+            activity_id=activity_id, types=[e.value for e in StravaStreams]
+        )
+        stream_time = streams.get(StravaStreams.TIME.value, Stream()).data
+        for stream in StravaStreams:
+            stream_type = stream.value
+            stream_data = streams.get(stream_type, Stream()).data
+            if stream != StravaStreams.TIME and stream_data is not None:
+                paired_streams = [
+                    {"time": t, stream_type: d}
+                    for t, d in zip(stream_time, stream_data)
+                ]
+                path = get_strava_storage_path(
+                    bucket=InfrastructureNames.bronze_bucket,
+                    athlete_id=athlete_id,
+                    strava_model=stream,
+                    activity_id=activity_id,
+                )
+                write_json_to_storage(path, paired_streams)
