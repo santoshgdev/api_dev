@@ -26,7 +26,7 @@ def get_secret(name: str) -> dict:
     return json.loads(secret_payload)
 
 
-def write_json_to_storage(path: CloudPath, data: dict):
+def write_json_to_storage(path: CloudPath, data: dict | list) -> None:
     """Write json to storage."""
     with path.open("w") as f:
         json.dump(data, f)
