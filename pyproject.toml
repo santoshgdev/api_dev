@@ -14,6 +14,8 @@ types-redis = "^4.6.0.20241004"
 redis = "^5.2.1"
 fire = "^0.7.0"
 cloudpathlib = {extras = ["gs"], version = "^0.20.0"}
+stravalib = "^2.1"
+tqdm = "^4.67.1"
 
 
 [build-system]
