@@ -16,6 +16,8 @@ def setup_logger(name: str | None = None, level: int = logging.DEBUG) -> Logger:
     # Create a custom logger
     logger = logging.getLogger(name)
     logger.setLevel(level)
+    logging.getLogger("urllib3").setLevel(logging.WARNING)
+    logging.getLogger("stravalib").setLevel(logging.WARNING)
 
     # Prevent adding duplicate handlers if this function is called multiple times
     if logger.hasHandlers():
