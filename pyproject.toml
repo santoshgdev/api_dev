@@ -16,6 +16,7 @@ fire = "^0.7.0"
 cloudpathlib = {extras = ["gs"], version = "^0.20.0"}
 stravalib = "^2.1"
 tqdm = "^4.67.1"
+pandas = "^2.2.3"
 
 
 [build-system]

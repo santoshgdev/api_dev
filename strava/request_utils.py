@@ -67,7 +67,7 @@ def write_refreshed_access_token_to_redis():
     logger.info("Refreshed strava access token")
 
 
-def get_all_data(InfrastructureNames: Enum) -> None:
+def get_all_data(InfrastructureNames: Enum) -> str | None:
     """Get all activities."""
     redis = RedisConnect()
     strava_access_dict_from_redis = redis.read_redis(
@@ -112,3 +112,4 @@ def get_all_data(InfrastructureNames: Enum) -> None:
                     activity_id=activity_id,
                 )
                 write_json_to_storage(path, paired_streams)
+    return athlete_id
