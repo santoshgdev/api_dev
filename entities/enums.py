@@ -1,4 +1,4 @@
-"""Module for Strava enums."""
+"""Module for general enums."""
 from enum import Enum
 
 

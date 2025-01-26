@@ -10,7 +10,7 @@ from stravalib import Client
 from stravalib.model import Stream
 from tqdm import tqdm
 
-from strava.cloud_utils import get_strava_storage_path
+from stream.strava.cloud_utils import get_strava_storage_path
 from strava.entities import StravaKeys, StravaModels, StravaStreams, StravaURLs
 from utils.cloud_utils import get_secret, write_json_to_storage
 from utils.infrastructure.RedisConnect import RedisConnect
