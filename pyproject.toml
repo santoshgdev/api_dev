@@ -1,12 +1,12 @@
 [tool.poetry]
-name = "api-dev"
+name = "api_dev"
 version = "0.1.0"
 description = ""
 authors = ["Santosh Gummidipundi <santosh@santoshg.io>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.12"
+python = "3.12.2"
 google-cloud = "^0.34.0"
 google-cloud-secret-manager = "^2.22.1"
 pre-commit = "^4.0.1"
@@ -17,6 +17,7 @@ cloudpathlib = {extras = ["gs"], version = "^0.20.0"}
 stravalib = "^2.1"
 tqdm = "^4.67.1"
 pandas = "^2.2.3"
+fitnessllm-dataplatform = {path = "../fitnessllm-dataplatform", develop = true}
 
 
 [build-system]

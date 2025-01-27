@@ -1,6 +1,6 @@
 import pytest
 
-from utils.cloud_utils import create_resource_path
+from api_dev.utils.cloud_utils import create_resource_path
 
 
 @pytest.mark.parametrize(

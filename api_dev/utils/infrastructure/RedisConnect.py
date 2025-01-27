@@ -3,8 +3,8 @@ import json
 
 import redis
 
-from utils.cloud_utils import get_secret
-from utils.logging_utils import logger
+from api_dev.utils.cloud_utils import get_secret
+from api_dev.utils.logging_utils import logger
 
 
 class RedisConnect:

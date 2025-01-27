@@ -5,7 +5,7 @@ from os import environ
 from cloudpathlib import CloudPath
 from google.cloud import secretmanager
 
-from utils.logging_utils import logger
+from api_dev.utils.logging_utils import logger
 
 
 def create_resource_path(project_id: str, service: str, name: str) -> str:

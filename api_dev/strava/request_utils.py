@@ -8,13 +8,13 @@ from os import environ
 import requests
 from stravalib import Client
 from stravalib.model import Stream
+from stream.strava.cloud_utils import get_strava_storage_path
 from tqdm import tqdm
 
-from stream.strava.cloud_utils import get_strava_storage_path
-from strava.entities import StravaKeys, StravaModels, StravaStreams, StravaURLs
-from utils.cloud_utils import get_secret, write_json_to_storage
-from utils.infrastructure.RedisConnect import RedisConnect
-from utils.logging_utils import logger
+from api_dev.strava.entities import StravaKeys, StravaModels, StravaStreams, StravaURLs
+from api_dev.utils.cloud_utils import get_secret, write_json_to_storage
+from api_dev.utils.infrastructure.RedisConnect import RedisConnect
+from api_dev.utils.logging_utils import logger
 
 
 def get_strava_access_token(

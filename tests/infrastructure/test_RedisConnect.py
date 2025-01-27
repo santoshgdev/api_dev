@@ -2,13 +2,13 @@ import json
 from os import environ
 from unittest.mock import patch
 
-from utils.infrastructure.RedisConnect import RedisConnect
+from api_dev.utils.infrastructure.RedisConnect import RedisConnect
 
 
 class TestRedisConnect:
     """Test module for RedisConnect."""
 
-    @patch("utils.infrastructure.RedisConnect.get_secret")
+    @patch("api_dev.utils.infrastructure.RedisConnect.get_secret")
     @patch("redis.Redis")
     @patch.dict(environ, {"PROJECT_ID": "1234"})
     def test_write_redis(self, mock_redis, mock_get_secret):
@@ -32,7 +32,7 @@ class TestRedisConnect:
             name=key, value=json.dumps(value), time=ttl
         )
 
-    @patch("utils.cloud_utils.get_secret")
+    @patch("api_dev.utils.cloud_utils.get_secret")
     @patch("redis.Redis")
     @patch.dict("os.environ", {"PROJECT_ID": "1234"})
     def test_read_redis(self, mock_redis, mock_get_secret):
@@ -54,7 +54,7 @@ class TestRedisConnect:
         assert result == expected_value
         redis_instance.get.assert_called_once_with(key)
 
-    @patch("utils.infrastructure.RedisConnect.get_secret")
+    @patch("api_dev.utils.infrastructure.RedisConnect.get_secret")
     @patch("redis.Redis")
     @patch.dict("os.environ", {"PROJECT_ID": "1234"})
     def test_read_redis_key_not_exist(self, mock_redis, mock_get_secret):
